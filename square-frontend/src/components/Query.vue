@@ -1,11 +1,11 @@
 <!-- Component for the Search Query. The user can enter a question here and change the query options. -->
 <template>
   <form v-on:submit.prevent="askQuestion">
-    <div class="row">
-      <div class="col-md-4 ms-auto">
-        <CompareSkills selector-target="qa" v-on:input="changeSelectedSkills" class="border-danger" />
-      </div>
-      <div class="col-md-4 me-auto mt-4 mt-md-0">
+    <div class="ms-auto">
+      <CompareSkills selector-target="qa" v-on:input="changeSelectedSkills" class="border-danger" />
+    </div>
+    <div class="row"> 
+      <div class="col-md-4 mt-4 mt-md-0"> 
         <div class="bg-light border border-success rounded shadow h-100 p-3">
           <div class="w-100">
             <label for="question" class="form-label">2. Enter you question</label>
@@ -28,7 +28,7 @@
           </div>
         </div>
       </div>
-      <div v-if="skillSettings.requiresContext" class="col-md-4 mt-4 mt-md-0">
+      <div v-if="skillSettings.requiresContext" class="col-md-4-mod66 mt-4 mt-md-0">
         <div class="bg-light border border-warning rounded shadow h-100 p-3">
           <div class="w-100">
             <label for="context" class="form-label">3. Provide context</label>
@@ -168,3 +168,12 @@ export default Vue.component('query-skills', {
   }
 })
 </script>
+
+<style>
+.col-md-4-mod66 {
+  -webkit-box-flex: 0;
+  -ms-flex: 0 0 auto;
+  flex: 0 0 auto;
+  width: 66.666%;
+}
+</style>
