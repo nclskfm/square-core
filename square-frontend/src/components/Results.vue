@@ -1,6 +1,59 @@
 <!-- Component for the Results. The user can see the results of each chosen skill here. Results can have different formats. -->
 <template>
-  <div v-if="currentResults.length">
+  <div v-if="currentResults.length" >
+    <div class="row" style="width: 95%; margin:0 auto;" >
+      <div class="col">
+        <div class="row">
+          <div class="col mt-3" v-if="showContextToggle" >
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center" style="z-index: 9; margin: -60px;">
+              <a
+                  v-on:click="showWithContext = !showWithContext"
+                  :class="{ 'active': showWithContext }"
+                  role="button"
+                  class="btn btn-primary shadow">
+                Show answers {{ showWithContext ? 'without' : 'with' }} context
+              </a>
+            </div>
+          </div>
+          <div class="col mt-3">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center" style="z-index: 9; margin: -60px;">
+              <a data-bs-toggle="modal" data-bs-target="#modalattack" role="button" class="btn btn-primary shadow">
+                Attack Methods
+              </a>
+              <AttackOutput id="modalattack"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center" style="z-index: 9; margin: -60px;">
+          {{&nbsp;}}
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="row">
+          <div class="col mt-3">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center" style="z-index: 9; margin: -60px;">
+              <a data-bs-toggle="modal" data-bs-target="#modalExplain" role="button" class="btn btn-primary shadow">
+                Explain this output
+              </a>
+              <ExplainOutput id="modalExplain"/>
+            </div>
+          </div>
+          <div class="col mt-3" v-if="this.$store.state.currentSkills.includes('62eb8f7765872e7b65ea5c8b')">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center" style="z-index: 9; margin: -60px;">
+              <a data-bs-toggle="modal" data-bs-target="#modalGraph" role="button" class="btn btn-primary shadow">
+                Show Graph
+              </a>
+              <GraphViz id="modalGraph"/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="row">
       <div class="col table-responsive bg-light border border-primary rounded shadow p-3 mx-3 mt-4">
         <table class="table table-borderless">
@@ -44,47 +97,6 @@
           </tbody>
         </table>
       </div>
-    </div>
-    <div class="row">
-      <div class="col mt-3" v-if="showContextToggle">
-        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-          <a
-              v-on:click="showWithContext = !showWithContext"
-              :class="{ 'active': showWithContext }"
-              role="button"
-              class="btn btn-primary shadow">
-            Show answers {{ showWithContext ? 'without' : 'with' }} context
-          </a>
-        </div>
-      </div>
-
-      <div class="col mt-3">
-        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-          <a data-bs-toggle="modal" data-bs-target="#modalattack" role="button" class="btn btn-primary shadow">
-            Attack Methods
-          </a>
-          <AttackOutput id="modalattack"/>
-        </div>
-      </div> 
-
-      <div class="col mt-3">
-        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-          <a data-bs-toggle="modal" data-bs-target="#modalExplain" role="button" class="btn btn-primary shadow">
-            Explain this output
-          </a>
-          <ExplainOutput id="modalExplain"/>
-        </div>
-      </div>
-
-      <div class="col mt-3" v-if="this.$store.state.currentSkills.includes('62eb8f7765872e7b65ea5c8b')">
-        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-          <a data-bs-toggle="modal" data-bs-target="#modalGraph" role="button" class="btn btn-primary shadow">
-            Show Graph
-          </a>
-          <GraphViz id="modalGraph"/>
-        </div>
-      </div>
-
     </div>
   </div>
 </template>
