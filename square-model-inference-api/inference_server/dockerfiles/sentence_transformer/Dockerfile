@@ -36,12 +36,27 @@ RUN python ./tests/pre_test_setup_for_docker_caching.py --sentence_transformer #
 COPY . ./
 RUN pip install pytest pytest-cov pytest-asyncio pytest-env
 RUN mkdir test-reports
+
+ENV MODEL sentence_transformer
+RUN rm -rf tests;
+COPY tests/$MODEL  tests/$MODEL
+COPY tests/test_api  tests/$MODEL/test_api
+COPY tests/test_worker  tests/$MODEL/test_worker
+
+COPY tests/test_inference/test_sentence_transformer.py  tests/$MODEL/test_inference/test_sentence_transformer.py
+COPY tests/test_inference/test_prediction_output_numpy.py tests/$MODEL/test_inference/test_prediction_output_numpy.py
+
+
 RUN PYTHONPATH=./ pytest \
     --junitxml=test-reports/junit.xml \
     --cov \
     --cov-report=xml:test-reports/coverage.xml \
     --cov-report=html:test-reports/coverage.html; \
-    echo $? > test-reports/pytest.existcode
+    echo $? > test-reports/pytest.existcode \
+
+
+
+
 
 # Deployment stage
 FROM base as build

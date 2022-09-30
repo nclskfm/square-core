@@ -41,6 +41,31 @@ RUN python ./tests/pre_test_setup_for_docker_caching.py --transformer # TODO:add
 COPY . ./
 RUN pip install pytest pytest-cov pytest-asyncio pytest-env
 RUN mkdir test-reports
+
+
+##COPY tests/test_api ./tests/transformer/test_api
+#RUN mv tests/test_api ./tests/transformer/test_api
+#RUN mkdir -p ./tests/transformer/test_inference
+#RUN ls tests/test_inference
+#RUN mv ./tests/test_inference/test_transformers.py ./tests/transformer/test_inference/test_transformers.py
+##RUN mv tests/test_inference ./tests/transformer/test_inference
+#RUN mv tests/test_worker ./tests/transformer/test_worker
+#RUN pwd
+#RUN ls tests/transformer
+
+ENV MODEL transformer
+RUN rm -rf tests;
+COPY tests/$MODEL  tests/$MODEL
+COPY tests/test_api  tests/$MODEL/test_api
+COPY tests/test_worker  tests/$MODEL/test_worker
+COPY tests/test_inference/test_transformers.py  tests/$MODEL/test_inference/test_transformers.py
+COPY tests/test_inference/test_adapter.py  tests/$MODEL/test_inference/test_adapter.py
+COPY tests/test_inference/test_prediction_output_numpy.py tests/$MODEL/test_inference/test_prediction_output_numpy.py
+
+#RUN apt install tree
+#RUN tree tests/transformer
+
+
 RUN PYTHONPATH=./ pytest \
     --junitxml=test-reports/junit.xml \
     --cov \

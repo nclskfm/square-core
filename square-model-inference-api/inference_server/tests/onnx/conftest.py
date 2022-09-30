@@ -28,8 +28,8 @@ from main import get_app, auth
 
 from tasks.inference.transformer import Transformer
 from tasks.inference.adaptertransformer import AdapterTransformer
-from tasks.inference.sentencetransformer import SentenceTransformer
-
+# from tasks.inference.sentencetransformer import SentenceTransformer
+#
 from tasks.inference.onnx import Onnx
 from tasks.config.model_config import ModelConfig, set_test_config, model_config
 from square_model_inference.models.request import PredictionRequest

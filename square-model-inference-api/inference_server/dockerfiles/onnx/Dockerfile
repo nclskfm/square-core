@@ -31,6 +31,19 @@ RUN python ./tests/pre_test_setup_for_docker_caching.py
 COPY . ./
 RUN pip install pytest pytest-cov pytest-asyncio pytest-env
 RUN mkdir test-reports
+
+
+ENV MODEL onnx
+RUN rm -rf tests;
+COPY tests/$MODEL  tests/$MODEL
+COPY tests/test_api  tests/$MODEL/test_api
+COPY tests/test_worker  tests/$MODEL/test_worker
+
+COPY tests/test_inference/test_onnx.py  tests/$MODEL/test_inference/test_onnx.py
+COPY tests/test_inference/test_prediction_output_numpy.py tests/$MODEL/test_inference/test_prediction_output_numpy.py
+
+
+
 RUN PYTHONPATH=./ pytest \
     --junitxml=test-reports/junit.xml \
     --cov \
