@@ -2,7 +2,7 @@ name: "CI Model API"
 
 on:
   push:
-    branches: [ master ]
+    branches: [ model-api-v2-opt ]
     paths:
       - "square-model-inference-api/**"
       - ".github/**"
