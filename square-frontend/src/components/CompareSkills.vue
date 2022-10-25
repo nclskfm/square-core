@@ -1,6 +1,6 @@
 <!-- The Navigation Bar at the top of the page. Most views should be reachable through this. -->
 <template>
-  <div class="bg-light border rounded shadow h-100 p-3" style="border-bottom-style: solid;border-bottom-width: 0px;margin-bottom: 24px;">
+  <div class="bg-light border rounded shadow p-3 " style="height: 30em; border-bottom-style: solid;border-bottom-width: 0px;margin-bottom: 24px;">
     <div class="w-100">
       <div class="mb-3">
         <label for="skill1" class="form-label d-block placeholder-glow">
@@ -11,35 +11,37 @@
         <div>
           <input v-model="searchText" placeholder="Search skill" class="search-bar form-control-lg mb-2" style="margin-left: 8px;" />
         </div>
-        <a class="checkbox" v-for="(skill, index) in filteredSkills" :key="skill.id">   
-          <button class="btn btn-outline-primary btn-block btn-sm px-4 my-2 mx-2">
-              <header>
-                <h4>
-                  <input            
-                  v-on:input="selectSkill(skill.id, index)"
-                  type="checkbox"
-                  v-bind:value="skill.id"
-                  v-model="sel_list[index]"
-                  :disabled="waiting">    
+        <div style="height: 20em; overflow-y: scroll;">
+          <a class="checkbox" v-for="(skill, index) in filteredSkills" :key="skill.id">   
+            <button class="btn btn-outline-primary btn-block btn-sm px-4 my-2 mx-2">
+                <header>
+                  <h4>
+                    <input            
+                    v-on:input="selectSkill(skill.id, index)"
+                    type="checkbox"
+                    v-bind:value="skill.id"
+                    v-model="sel_list[index]"
+                    :disabled="waiting">    
 
-                  {{skill.name}}
-                </h4>
-                <div class="text-gray-400 text-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
-                  </svg>
-                  {{skill.skill_type}}
-                  <span class="px-1.5 text-gray-300">• </span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
-                    <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
-                  </svg>
-                  {{skill.default_skill_args.base_model}}
-                </div>
-              </header>
-          
-            </button>
-          </a>
+                    {{skill.name}}
+                  </h4>
+                  <div class="text-gray-400 text-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                      <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                      <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                    </svg>
+                    {{skill.skill_type}}
+                    <span class="px-1.5 text-gray-300">• </span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-seam" viewBox="0 0 16 16">
+                      <path d="M8.186 1.113a.5.5 0 0 0-.372 0L1.846 3.5l2.404.961L10.404 2l-2.218-.887zm3.564 1.426L5.596 5 8 5.961 14.154 3.5l-2.404-.961zm3.25 1.7-6.5 2.6v7.922l6.5-2.6V4.24zM7.5 14.762V6.838L1 4.239v7.923l6.5 2.6zM7.443.184a1.5 1.5 0 0 1 1.114 0l7.129 2.852A.5.5 0 0 1 16 3.5v8.662a1 1 0 0 1-.629.928l-7.185 2.874a.5.5 0 0 1-.372 0L.63 13.09a1 1 0 0 1-.63-.928V3.5a.5.5 0 0 1 .314-.464L7.443.184z"/>
+                    </svg>
+                    <!-- {{skill.default_skill_args.base_model}} -->
+                  </div>
+                </header>
+            
+              </button>
+            </a>
+            </div> 
       </div>
       <!-- <p> {{availableSkills}} </p> -->
       <!-- <p> {{searchText}} </p> -->
