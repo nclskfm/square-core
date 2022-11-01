@@ -133,6 +133,13 @@
                 <div class="col-4"></div>
               </div>
 
+              
+
+
+            </div>
+          </div>
+          <div class="carousel-item">
+            <div class="container d-block w-75">
               <div v-if="this.feedback" class="row mt-4">
                 <div class="d-grid gap-1 d-md-flex justify-content-md-center">
                   <a v-on:click="askQuestionWithFeedback()" role="button" class="btn btn-warning shadow">
@@ -140,12 +147,6 @@
                   </a>
                 </div>
               </div>
-
-
-            </div>
-          </div>
-          <div class="carousel-item">
-            <div class="container d-block w-75">
               <Results v-if="isShowingResults" />
             </div>
           </div>
