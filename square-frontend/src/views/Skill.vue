@@ -80,6 +80,13 @@
         </div>
       </div>
       <div class="row">
+        <div class="col mt-3">
+          <label for="datasets" class="form-label">Skill Datasets</label>
+          <multiselect v-model="skill.skill_datasets" :options="skillDatasets" :multiple="true" :close-on-select="false" placeholder="Select a dataset"></multiselect>
+          <small class="text-muted">Select one or more datasets that your skill should automatically be evaluated on.</small>
+        </div>
+      </div>
+      <div class="row">
         <div class="col mt-4">
           <h3>Provide example questions</h3>
           <p class="mb-1">These examples will be featured alongside your skill.</p>
@@ -129,21 +136,25 @@
   </form>
 </template>
 
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <script>
 import Vue from 'vue'
 import Alert from '@/components/Alert.vue'
 import Card from '@/components/Card.vue'
 import Status from '@/components/Status.vue'
-import { getSkill, getSkillTypes } from '@/api'
+import Multiselect from 'vue-multiselect'
+import { getSkill, getSkillTypes, getSkillDatasets } from '@/api'
 
 export default Vue.component('edit-skill', {
   data() {
     return {
       skillTypes: [],
+      skillDatasets: [],
       skill: {
         name: '',
         skill_type: '',
+        skill_datasets: [],
         description: '',
         skill_settings: {
           requires_context: false,
@@ -171,7 +182,8 @@ export default Vue.component('edit-skill', {
   components: {
     Alert,
     Card,
-    Status
+    Status,
+    Multiselect
   },
   computed: {
     /**
@@ -297,6 +309,10 @@ export default Vue.component('edit-skill', {
     getSkillTypes(this.$store.getters.authenticationHeader())
         .then((response) => {
           this.skillTypes = response.data
+        })
+    getSkillDatasets(this.$store.getters.authenticationHeader())
+        .then((response) => {
+          this.skillDatasets = response.data
         })
     if (!this.isCreateSkill) {
       getSkill(this.$store.getters.authenticationHeader(), this.$route.params.id)
