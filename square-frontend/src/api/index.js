@@ -22,20 +22,9 @@ export function getSkillTypes(headers) {
  * @param {Object} headers optional authentication header
  */
  export function getSkillDatasets(headers) {
-    // TODO: make it call the actual datasets endpoint
-    // return axios.get(`${SKILL_URL}/skill-datasets`, { headers: headers })
-    return new Promise((resolve) => {
-        resolve({
-            headers: headers,
-            data: [
-                "Placeholder dataset 1", 
-                "Placeholder dataset 2", 
-                "Placeholder dataset 3", 
-                "Placeholder dataset 4", 
-                "Placeholder dataset 5"
-            ]
-        })
-    })
+    // TODO: make it call the actual datasets endpoint before merge
+    //return axios.get(`${SKILL_URL}/skill-datasets`, { headers: headers })
+    return axios.get("http://localhost:8000/api/skill-datasets", { headers: headers })
 }
 
 /**

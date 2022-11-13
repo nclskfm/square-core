@@ -16,6 +16,7 @@ The Skill-Manager serves as a central service for interacting with the Skills. I
 │   │   ├───api.py                          # Main router for all routes with `/api` prefix
 │   │   ├───health.py                       # Routes with `/api/health` prefix
 │   │   ├───skill_types.py                  # Routes with `/api/skill-types` prefix
+│   │   ├───skill_datasets.py               # Routes with `/api/skill-datasets` prefix
 │   │   ├───skill.py                        # Routes with `/api/skill` prefix
 │   ├───settings
 │   │   ├───keycloak_settings.py            # Settings class for Keycloak, loads .env variables
