@@ -10,3 +10,4 @@ requests-cache
 scikit-learn
 datasets
 evaluate
+redis
