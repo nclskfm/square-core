@@ -14,6 +14,7 @@ from evaluator.core import DatasetHandler
 from evaluator.core.dataset_handler import DatasetDoesNotExistError
 from evaluator.models import Prediction, PredictionResult
 from evaluator.routers import client_credentials
+from evaluator.routers.evaluator import get_dataset_metadata
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/predictor")

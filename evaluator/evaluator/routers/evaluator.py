@@ -8,10 +8,18 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
 from square_auth.auth import Auth
+from square_skill_api.models import PredictionOutput
 
 from evaluator import mongo_client
 from evaluator.core.dataset_handler import DatasetDoesNotExistError, DatasetHandler
-from evaluator.models import Metric, MetricResult, PredictionResult
+from evaluator.core.metric_formatters import Formatter, MetricFormattingError
+from evaluator.models import (
+    ExtractiveDatasetSample,
+    Metric,
+    MetricResult,
+    MultipleChoiceDatasetSample,
+    PredictionResult,
+)
 from evaluator.routers import client_credentials
 
 logger = logging.getLogger(__name__)
@@ -36,11 +44,6 @@ async def evaluate(
         f"start evaluation with parameters: skill_id={skill_id}; dataset_name={dataset_name}; metric_name={metric_name}"
     )
 
-    # ToDo: Add support for other metrics
-    if metric_name != "squad":
-        logger.error("Unsupported metric name!")
-        raise HTTPException(400, "Sorry, we currently only support the metric 'squad'!")
-
     object_identifier = {"skill_id": ObjectId(skill_id), "dataset_name": dataset_name}
 
     # Load the metric from HuggingFace
@@ -62,7 +65,6 @@ async def evaluate(
         msg = f"Predictions for skill_id='{skill_id}' and dataset_name='{dataset_name}' not found!"
         logger.error(msg)
         raise HTTPException(404, msg)
-
     # Load the dataset from DatasetHandler
     try:
         dataset = dataset_handler.get_dataset(dataset_name)

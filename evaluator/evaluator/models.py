@@ -70,3 +70,22 @@ class MetricResult(MongoModel):
         ..., description="Identifier of the corresponding PredictionResult object"
     )
     metrics: dict = Field(..., description="Dictionary of all Metric objects")
+
+
+class ExtractiveDatasetSample(BaseModel):
+    id: str = Field(..., description="ID of the sample in the dataset.")
+    question: str = Field(..., description="Question of the sample.")
+    context: str = Field(
+        ..., description="Context that contains the answer to the question."
+    )
+    answers: List[str] = Field(...)
+
+
+class MultipleChoiceDatasetSample(BaseModel):
+    id: str = Field(..., description="ID of the sample in the dataset.")
+    question: str = Field(..., description="Question of the sample.")
+    choices: List[str] = Field(...)
+    answer_index: int = Field(
+        ...,
+        description="Index of the choice-entry in choices that represents the correct answer.",
+    )
