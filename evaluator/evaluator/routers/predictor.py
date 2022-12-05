@@ -36,21 +36,12 @@ async def predict(
     logger.debug(
         f"start predictions with parameters: skill_id={skill_id}; dataset_name={dataset_name}"
     )
-    # get dataset metadata
-    dataset_metadata = get_dataset_metadata(dataset_name)
-    # get the dataset
     try:
         dataset = dataset_handler.get_dataset(dataset_name)
     except DatasetDoesNotExistError:
-        logger.error("Dataset does not exist!")
+        logger.debug("Dataset does not exist!")
         raise HTTPException(400, "Dataset does not exist!")
     logger.debug(f"Dataset loaded: {dataset}")
-    # format the dataset into universal format for its skill-type
-    try:
-        dataset = dataset_handler.to_generic_format(dataset, dataset_metadata)
-    except ValueError as e:
-        logger.error(f"{e}")
-        raise HTTPException(400, f"{e}")
 
     headers = {"Authorization": f"Bearer {token}"}
     if request.headers.get("Cache-Control"):
@@ -61,27 +52,11 @@ async def predict(
 
     for i in range(8):
         reference_data = dataset[i]
-
-        if dataset_metadata["skill-type"] == "extractive-qa":
-            # 62c1ae1b536b1bb18ff91ce3 # squad
-            query_request = {
-                "query": reference_data["question"],
-                "skill_args": {"context": reference_data["context"]},
-                "num_results": 1,
-            }
-        elif dataset_metadata["skill-type"] == "multiple-choice":
-            # 62c1ae19536b1bb18ff91cde # commonsense_qa
-            query_request = {
-                "query": reference_data["question"],
-                "skill_args": {"choices": reference_data["choices"]},
-                "num_results": 1,
-            }
-        else:
-            skill_type = dataset_metadata["skill-type"]
-            raise HTTPException(
-                400,
-                f"Predictions on '{skill_type}' datasets is currently not supported.",
-            )
+        query_request = {
+            "query": reference_data["question"],
+            "skill_args": {"context": reference_data["context"]},
+            "num_results": 1,
+        }
 
         response = requests.post(
             f"https://square.ukp-lab.de/api/skill-manager/skill/{skill_id}/query",
