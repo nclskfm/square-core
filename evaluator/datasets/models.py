@@ -1,70 +1,17 @@
-from collections.abc import Iterable
-from typing import List
-
-from pydantic import BaseModel
-
-
-class DatasetField(BaseModel):
-    """Model one field in a dataset schema.
-
-    """
-    name: str
-    skill_type: str
-    metric: str
-    mapping: dict
-    """{
-        id_column: int,
-        question_column: int,
-        context_column: str,
-        answer_column: str
-
-    }
-    """
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "dataset_name": "text",
-                "skill_type": "text",
-                "metric": "text_metric",
-                "mapping": "text_mapping"
-            }
-        }
+from pydantic import BaseModel, Field
+from evaluator.evaluator.mongo.mongo_model import MongoModel
 
 
 class Dataset(BaseModel):
-    """Models one datastore schema."""
-    name: str
-    fields: List[DatasetField]
-
-    @property
-    def names(self) -> List[str]:
-        return [field.name for field in self.fields]
-
-    @property
-    def skill_type(self) -> List[str]:
-        return [field.skill_type for field in self.fields]
-
-    @property
-    def metric(self) -> List[str]:
-        return [field.metric for field in self.fields]
-
-    @property
-    def maping_object(self) -> List[dict]:
-        return [field.mapping for field in self.fields]
+    dataset_name: str = Field(...)
+    skill_type: str = Field(...)
+    metric: str = Field(...)
+    mapping: dict = Field(...,
+                          description="Dictionary of mapping object. The values depend on the respective dastaset.")
 
 
-class DatasetRequest(Iterable, BaseModel):
-    """Models a dataset as requested by the user. Used when creating Dataset"""
-    __root__: List[Dataset]
-
-    def __iter__(self):
-        return self.__root__.__iter__()
-
-    class Config:
-        schema_extra = {
-            "example": [
-                DatasetField(name="name", skill_type="text", metric="metric_text"),
-                DatasetField(name="test", skill_type="test", metric="metric_text"),
-            ]
-        }
+class DatasetResult(MongoModel):
+    dataset_name: str = Field(..., description="ID of the sample dataset.")
+    skill_type: str = Field(..., description="Type of the skill")
+    metric: str = Field(..., description="metric")
+    mapping: dict = Field(..., description="Dictionary of all mapping objects")
