@@ -1,163 +1,167 @@
 import logging
-from typing import List
-
+from fastapi import Depends, HTTPException, Request
+from evaluate import load
 from fastapi import APIRouter
-from fastapi import HTTPException, Response, status, Request
-from fastapi.param_functions import Body, Path
-
-from evaluator.datasets.models import Dataset, DatasetRequest
+from typing import Dict, List
+from evaluator.datasets.models import Dataset, DatasetResult
 from evaluator.evaluator.core.dataset_handler import DatasetHandler
+from bson import ObjectId
+from square_auth.auth import Auth
+from evaluator.evaluator.core.dataset_handler import DatasetDoesNotExistError
+from evaluator.evaluator.routers import client_credentials
+from evaluator.evaluator import mongo_client
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/dataset")
 dataset_item_type = 'dataset'
 dataset_handler = DatasetHandler()
 
+auth = Auth()
+
 
 @router.get(
-    "/dataset/{name}",
+    "/dataset/{dataset_name}",
     name="squad",
-    skill_type="extractive-qa",
-    metric="accuracy",
-    mapping={
-        "id_column": "id",
-        "question_column": "questions",
-        "context_column": "context",
-        "answer_column": "anwers"
-    },
-    response_datasetmodel={
+    responses={
         200: {
-            "model": List[Dataset],
-            "description": "List of all datasets",
+            "model": List[Dataset]
         },
-        404: {"description": "The dataset could not be found"},
+        404: {
+            "description": "The dataset could not be found"
+        }
     },
-    # response_datasetmodel=List[Dataset],
 )
 async def get_datasets():
-    """Returns a Datalist."""
-    datasets = [dataset.name for dataset in Dataset]
+    """Return list of datasets value."""
+    datasets = [data.value for data in Dataset]
 
-    logger.debug("get_dataset {dataset_name}".format(datasets=datasets))
+    logger.debug("get_datasets: ".format(datasets=datasets))
     return datasets
 
 
 @router.put(
-    "/dataset/{name}",
-    name="squad",
-    skill_type="extractive-qa",
-    metric="accuracy",
-    mapping={
-
-        "id-column": "id",
-        "question-column": "questions",
-        "context-column": "context",
-        "answer-column": "answers"
-    },
-    responses={
-        200: {
-            "model": Dataset,
-            "name": "The dataset information",
-        },
-        400: {
-            "name": "Failed to create the dataset in the API database",
-        },
-        500: {
-            "name": "Failed to create the dataset in the backend.",
-        },
-    },
-    response_model=Dataset,
+    "/dataset/{dataset_name}",
+    status_code=201,
 )
 async def put_dataset(
-        request: Request,
-        dataset_name: str = Path(..., description="dataset name"),
-        fields: DatasetRequest = Body(..., description="The dataset fields"),
-        # get dataset
-        dataset_item_name=dataset_handler.get_dataset(dataset_name=get_datasets),
-        response: Response = None,
 
 ):
-    # get existing dataset
-    schema = await dataset_item_name
-    success = False
-    if schema is None:
-        # it create a new  dataset
-        response.status_code = status.HTTP_201_CREATED
-
-    else:
-
-        response.status_code = status.HTTP_200_OK
-
-    if success:
-
-        return schema
-    else:
-        raise HTTPException(status_code=400)
+    logger.debug("put dataset")
 
 
 @router.delete(
-    "/dataset/{name}",
-    name="Delete a dataset",
-    skill_type="extractive-qa",
-    metric="accuracy",
-    mapping={
-        "id_column": "id",
-        "question-column": "questions",
-        "context-column": "context",
-        "answer-co": "answers"
-    },
-    responses={
-        204: {
-            "description": "The dataset is deleted",
-        },
-        404: {"description": "The dataset could not be deleted from the API database"},
-        500: {
-            "description": "Failed to delete the dataset from the storage backend.",
-        },
-    },
+    "/dataset/{dataset_name}",
+    status_code=201,
+
 )
 async def delete_dataset(
 
-        request: Request,
-        dataset_name: str = Path(..., description="The dataset name"),
-        dataset_item_name=dataset_handler.get_dataset(dataset_name=get_datasets),
 ):
-    if not (await dataset_item_name):
-        return Response(status_code=404)
-
-    success = dataset_handler.remove_dataset(dataset_item_name)
-
-    if success:
-        return Response(status_code=204)
-    else:
-        return Response(status_code=404)
+    logger.debug("deleted dataset by name")
 
 
 @router.post(
-    "/dataset/{name}",
-    name="Delete a dataset",
-    skill_type="extractive-qa",
-    metric="sqauad",
-    mapping={
-        "id_column": "id",
-        "question-column": "questions",
-        "context-column": "context",
-        "answer-co": "answers"
-    },
-    responses={
-        200: {"name": "dataset has besuccessfully upload to the dataset."},
-
-        204: {"name": "The dataset is deleted"},
-        404: {"name": "The dataset could not be deleted from the API database"},
-        422: {"name": "Cannot instantiate a Document object"},
-        500: {"name": "Failed to delete the dataset from the storage backend.", },
-
-    },
+    "/dataset/{dataset_name}",
+    status_code=201,
 )
 async def create_dataset(
         request: Request,
-        dataset_name: str = Path(..., description="The dataset name"),
-        dataset_item_name=dataset_handler.get_dataset(dataset_name=get_datasets),
+        dataset_name: str,
+        skill_type: str,
+        metric: str,
+        mapping: dict,
+        dataset_handler: DatasetHandler = Depends(DatasetHandler),
+        token: str = Depends(client_credentials),
+        token_payload: Dict = Depends(auth),
 ):
-    if not (await dataset_item_name):
-        return Response(status_code=404)
+    logger.debug(f"post dataset: {dataset_name}, {skill_type}, {metric}, {mapping} ")
+
+    object_identification = {"dataset_name": ObjectId(dataset_name), "skill_type": ObjectId(skill_type),
+                             "metric": ObjectId(metric), "mapping": ObjectId(mapping)}
+
+    # load metric from huggingface
+    try:
+        metric = load(metric)
+    except FileNotFoundError:
+        logger.error(f"Metric with name='{metric}' not found")
+        raise HTTPException(404, f"Metric with name='{metric}' not found!")
+
+    # load skill_type from mongo database ToDO
+
+    # load dataset
+    dataset_metadata = get_dataset_metadata(dataset_name)
+    try:
+        dataset_metadata = dataset_handler.get_dataset(dataset_name)
+    except DatasetDoesNotExistError:
+        logger.error("Dataset does not exist!")
+        raise HTTPException(400, "Dataset name does not exist!")
+
+    # map dataset into a generic format
+
+    dataset_result = DatasetResult.from_mongo(
+        mongo_client.client.evaluator.results.find_one(dataset_name)
+    )
+    # Execute dataset post
+    dataset_ob = Dataset(dataset_name=dataset_name, skill_type=skill_type, metric=metric, mapping=mapping)
+
+    new_datasets = dataset_result.dataset_name
+    new_datasets[dataset_name] = dataset_ob
+
+    mongo_client.client.evaluator.results.replace_one(
+        dataset_name, dataset_result.mongo(), upsert=True
+    )
+    return dataset_ob
+
+
+def get_dataset_metadata(dataset_name):
+    if dataset_name == "squad":
+        return {
+            "name": "squad",
+            "skill-type": "extractive-qa",
+            "mapping": {
+                "id-column": "id",
+                "question-column": "question",
+                "context-column": "context",
+                "answer-text-column": "answers.text",
+            },
+        }
+    elif dataset_name == "quoref":
+        return {
+            "name": "quoref",
+            "skill-type": "extractive-qa",
+            "metric": "squad",
+            "mapping": {
+                "id-column": "id",
+                "question-column": "question",
+                "context-column": "context",
+                "answer-text-column": "answers.text",
+            },
+        }
+    elif dataset_name == "commonsense_qa":
+        return {
+            "name": "commonsense_qa",
+            "skill-type": "multiple-choice",
+            "metric": "accuracy",
+            "mapping": {
+                "id-column": "id",
+                "question-column": "question",
+                "choices-columns": ["choices.text"],
+                "choices-key-mapping-column": "choices.label",
+                "answer-index-column": "answerKey",
+            },
+        }
+    elif dataset_name == "cosmos_qa":
+        return {
+            "name": "cosmos_qa",
+            "skill-type": "multiple-choice",
+            "mapping": {
+                "id-column": "id",
+                "question-column": "question",
+                "choices-columns": ["answer0", "answer1", "answer2", "answer3"],
+                "choices-key-mapping-column": None,
+                "answer-index-column": "label",
+            },
+        }
+    else:
+        logger.error("Unsupported dataset!")
+        raise HTTPException(400, "Unsupported dataset!")
