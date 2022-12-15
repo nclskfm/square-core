@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from square_auth.auth import Auth
 
 from evaluator import mongo_client
-from evaluator.core.dataset_handler import DatasetDoesNotExistError, DatasetHandler
 from evaluator.models import Dataset, DatasetResult
 from evaluator.mongo.mongo_client import MongoClient
 from evaluator.routers import client_credentials
@@ -16,8 +15,6 @@ from evaluator.routers.evaluator import get_dataset_metadata
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/dataset")
 dataset_item_type = "dataset"
-dataset_handler = DatasetHandler()
-
 auth = Auth()
 
 
@@ -31,9 +28,6 @@ async def create_dataset(
     skill_type: str,
     metric: str,
     mapping: dict,
-    dataset_handler: DatasetHandler = Depends(DatasetHandler),
-    token: str = Depends(client_credentials),
-    token_payload: Dict = Depends(auth),
     validate: bool = False,
 ):
     logger.debug(
@@ -179,8 +173,10 @@ async def get_dataset(
         else:
             return "Dataset_name not exist on the datasets collection!"
 
-    except DatasetDoesNotExistError:
-        raise HTTPException(404, f"Dataset_name not found!")
+    except ValueError as e:
+        msg = f"Dataset_name: {dataset_name} not found; Error: {e}"
+        logger.debug(msg)
+        raise HTTPException(404, msg)
 
 
 @router.put(
@@ -196,10 +192,10 @@ async def put_dataset(dataset_name: str, skill_type: str, metric: str):
         dataset_result = mongo_client.client.evaluator.datasets.find(
             {"dataset_name": dataset_name}
         )
-    except DatasetDoesNotExist:
+    except ValueError as e:
+        msg = f" The dataset_name: {dataset_name} not be found; Error: {e}!"
         logger.error(msg)
-        raise HTTPException(400)
-
+        raise HTTPException(400, m)
     for dataset_item in dataset_result:
         if dataset_item["dataset_name"] is not None:
             try:
@@ -209,7 +205,10 @@ async def put_dataset(dataset_name: str, skill_type: str, metric: str):
 
                 logger.debug(f"Dataset_name {dataset_name} is updated from mongodb!")
                 return f"Dataset_name: {dataset_item['dataset_name']} has be update"
-            except HTTPException:
+            except ValueError as e:
+                msg = (
+                    f" The dataset_name: {dataset_name} cannot be inserted; Error: {e}!"
+                )
                 logger.error(msg)
                 raise HTTPException(400, msg)
     return dataset_name
@@ -228,7 +227,8 @@ async def delete_dataset(dataset_name: str):
             {"dataset_name": dataset_name}
         )
         logger.debug(f"db_dataser_name = {result_db}")
-    except DatasetDoesNotExistError:
+    except ValueError as e:
+        msg = f"Datasetr_name: {dataset_name} does not found; Error: {e}"
         logger.error(msg)
         raise HTTPException(404, msg)
 
@@ -242,7 +242,8 @@ async def delete_dataset(dataset_name: str):
                 logger.debug(
                     f"Dataset_name {item['dataset_name']} is deleted from mongodb!"
                 )
-            except DatasetDoesNotExistError:
+            except ValueError as e:
+                msg = f"Dataset_name: {dataset_name} cannot be deleted on the database"
                 logger.error(msg)
                 raise HTTPException(404, msg)
             return f"dataset_name: {item['dataset_name']} has be deleted!"
