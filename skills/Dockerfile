@@ -12,10 +12,11 @@ COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
 COPY main.py main.py
-ARG skill
-COPY ./$skill/skill.py skill.py 
+# ARG skill
+# COPY ./$skill/skill.py skill.py
+COPY ./extractive-qa/skill.py skill.py 
 COPY logging.conf logging.conf
 
-EXPOSE 80
+EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80", "--log-config", "logging.conf"]
+CMD ["uvicorn", "skills.main:app", "--host", "0.0.0.0", "--port", "8083", "--log-config", "logging.conf"]

@@ -30,6 +30,18 @@ auth:
 ##		Generate and print an access token from the private key.
 token:
 	@square_token
+##
+build:
+	docker compose --env-file .local.env build 
+##			Bring up the development environment.
+up:
+	docker compose --env-file .local.env up -d 
+##			Bring down the development environment.
+down:
+	docker compose --env-file .local.env down
+##		Build the development environment.
+logs:
+	docker compose --env-file .local.env logs -f skills
 
 # COLORS
 GREEN  := $(shell tput -Txterm setaf 2)

@@ -250,7 +250,7 @@ async def query_skill(
 
     logger.debug(f"query json={query_request.dict()}")
     response = session_cache.session.post(
-        f"{skill.url}/query",
+        f"http://skill/query",
         headers=headers,
         json=query_request.dict(),
     )

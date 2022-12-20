@@ -1,0 +1,32 @@
+version: '3'
+services:
+  skills: 
+    image: ukpsquare/skills:latest
+    build:
+      context: .
+      target: build
+    command: uvicorn main:app --reload --host 0.0.0.0 --port 8083 --log-config logging.conf
+    networks:
+    - skills
+    ports:
+    - 8083:8083
+    expose:
+    - 8083
+    environment:
+      API_PREFIX: ""
+      WEB_CONCURRENCY: "1"
+      KEYCLOAK_BASE_URL: ""
+      MODEL_API_URL: ""
+      VERIFY_ISSUER: "0"
+      SQUARE_PRIVATE_KEY_FILE: /app/private_key.pem
+    volumes:
+      - ./skill:/app/skill
+      - ./private_key.pem:/app/private_key.pem
+volumes:
+  mongo-data:
+networks: 
+  skills:
+    driver: bridge
+    name: skill_network
+      
+

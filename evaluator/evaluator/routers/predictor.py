@@ -84,7 +84,7 @@ async def predict(
             )
 
         response = requests.post(
-            f"https://square.ukp-lab.de/api/skill-manager/skill/{skill_id}/query",
+            f"http://skill-manager/query",
             headers=headers,
             data=json.dumps(query_request),
         )

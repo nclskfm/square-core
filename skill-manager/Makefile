@@ -32,9 +32,11 @@ token:
 
 ##			Bring up the development environment.
 up:
+##	docker network create skill-network
 	docker compose --env-file .local.env up -d 
 ##			Bring down the development environment.
 down:
+##	docker network rm skill-network
 	docker compose --env-file .local.env down
 ##		Build the development environment.
 build:
