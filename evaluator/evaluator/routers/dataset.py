@@ -68,7 +68,7 @@ async def create_dataset(
 
         if name == "quoref":
             dataset_mapping = {
-                "dataset_name": name,
+                "name": name,
                 "skill-type": skill_type,
                 "metric": metric,
                 "mapping": {
@@ -81,7 +81,7 @@ async def create_dataset(
 
         elif name == "commensense_qa":
             dataset_mapping = {
-                "dataset_name": name,
+                "name": name,
                 "skill-type": skill_type,
                 "metric": metric,
                 "mapping": {
@@ -160,6 +160,26 @@ async def get_dataset(
         msg = f"Dataset_name: {dataset_name} not found; Error: {e}"
         logger.debug(msg)
         raise HTTPException(404, msg)
+
+
+@router.get(
+    "/get_all_dataset/",
+    status_code=200,
+)
+async def get_all_datasets():
+    logger.debug("get all Datasets")
+
+    dataset_list = []
+    dataset_result = mongo_client.client.evaluator.datasets.find()
+
+    for item in dataset_result:
+        logger.debug("item get_all_dataset: ", item)
+
+        dataset_list.append(item["dataset_name"])
+        logger.debug("dataset exist on database! ")
+        return {"Dataset_name: ", item["dataset_name"]}
+
+    return {"dataset not found"}
 
 
 @router.put(
