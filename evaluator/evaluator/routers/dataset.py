@@ -79,6 +79,9 @@ async def create_dataset(
                 },
             }
 
+            mongo_client.client.evaluator.datasets.insert_one(dataset_mapping)
+            logger.debug(f"dataset_name: ", {dataset_mapping})
+
         elif name == "commensense_qa":
             dataset_mapping = {
                 "dataset_name": name,
@@ -93,13 +96,6 @@ async def create_dataset(
                 },
             }
 
-            dataset_ob = Dataset(
-                dataset_name=dataset_name,
-                skill_type=skill_type,
-                metric=metric,
-                mapping=mapping,
-            )
-            # mongo_client.client.evaluator.datasets.insert_one(dataset_mapping)
             mongo_client.client.evaluator.datasets.insert_one(dataset_mapping)
             logger.debug(f"dataset_name: ", {dataset_mapping})
             return dataset_mapping
@@ -220,15 +216,13 @@ async def delete_dataset(dataset_name: str):
 
             try:
                 mongo_client.client.evaluator.datasets.delete_one(
-                    {"dataset_name": item["dataset_name"]}
+                    {"dataset_name": dataset_name}
                 )
-                logger.debug(
-                    f"Dataset_name {item['dataset_name']} is deleted from mongodb!"
-                )
+                logger.debug(f"Dataset_name {dataset_name} is deleted from mongodb!")
             except ValueError as e:
                 msg = f"Dataset_name: {dataset_name} cannot be deleted on the database"
                 logger.error(msg)
                 raise HTTPException(404, msg)
-            return f"dataset_name: {item['dataset_name']} has be deleted!"
+            return f"dataset_name: {dataset_name} has be deleted!"
 
     return f"dataset_name: {dataset_name} not exist on the Database!"
