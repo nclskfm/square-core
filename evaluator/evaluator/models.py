@@ -92,9 +92,9 @@ class MultipleChoiceDatasetSample(BaseModel):
 
 
 class Dataset(BaseModel):
-    dataset_name: str = Field(...)
-    skill_type: str = Field(...)
-    metric: str = Field(...)
+    dataset_name: str = Field(..., description="name of dataset")
+    skill_type: str = Field(..., description="skill_type example")
+    metric: str = Field(..., description="Metric of the sample")
     mapping: Union[MultipleChoiceDatasetSample, ExtractiveDatasetSample] = Field(
         ...,
         description="Dictionary of mapping object. The values depend on the respective dastaset.",
