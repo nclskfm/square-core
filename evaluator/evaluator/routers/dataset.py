@@ -59,6 +59,7 @@ async def create_dataset(
 ):
     logger.debug(f"post dataset: {dataset}")
 
+    # Check if the dataset exist on the database, when yes, the item muss not be added
     if mongo_client.client.evaluator.datasets.count_documents(
         {"dataset_name": dataset.dataset_name}
     ):
@@ -100,7 +101,7 @@ async def create_dataset(
             return {f"Dataset {dataset.dataset_name} has been added to mongo DB!"}
 
         else:
-            return {f"Unknown dataset!"}
+            return {f"Unknown dataset_name!"}
 
 
 @router.get("/{dataset_name}", status_code=200)
@@ -112,41 +113,40 @@ async def get_dataset(
 
     logger.debug(f"GET dataset: dataset_name= {dataset_name}")
     try:
-        db_dataset_name = mongo_client.client.evaluator.datasets.find(
+        # check if the item exist
+        if mongo_client.client.evaluator.datasets.count_documents(
             {"dataset_name": dataset_name}
-        )
-        if db_dataset_name is not None:
+        ):
             logger.debug(f"Dataset_name exist on datasets collection!")
-            for item in db_dataset_name:
+            db_dataset_ob = mongo_client.client.evaluator.datasets.find(
+                {"dataset_name": dataset_name}
+            )
 
-                if str(item["dataset_name"]) == str("commonsense_qa"):
+            for item in db_dataset_ob:
+
+                if str(dataset_name) == str("commonsense_qa"):
 
                     return {
                         "dataset_name": item["dataset_name"],
                         "skill-type": item["skill-type"],
                         "metric": item["metric"],
                         "mapping": {
-                            "id-column": item["mapping"]["id-column"],
-                            "question-column": item["mapping"]["question-column"],
-                            "choices-columns": item["mapping"]["choices-columns"],
-                            "choices-key-mapping-column": item["mapping"][
-                                "choices-key-mapping-column"
-                            ],
-                            "answer-index-column": item["mapping"][
-                                "answer-index-column"
-                            ],
+                            "id": item["mapping"]["id"],
+                            "question": item["mapping"]["question"],
+                            "choices": item["mapping"]["choices"],
+                            "answer_index": item["mapping"]["answer_index"],
                         },
                     }
-                elif str(item["dataset_name"]) == str("quoref"):
+                elif str(dataset_name) == str("quoref"):
                     return {
                         "dataset_name": item["dataset_name"],
                         "skill-type": item["skill-type"],
                         "metric": item["metric"],
                         "mapping": {
-                            "id-column": item["mapping"]["id-column"],
-                            "question-column": item["mapping"]["question-column"],
-                            "context-column": item["mapping"]["context-column"],
-                            "answer-text-column": item["mapping"]["answer-text-column"],
+                            "id": item["mapping"]["id"],
+                            "question": item["mapping"]["question"],
+                            "context": item["mapping"]["context"],
+                            "answers": item["mapping"]["answers"],
                         },
                     }
                 else:
@@ -204,27 +204,22 @@ async def delete_dataset(dataset_name: str):
 
     # check if dataset_name exist on the database
     try:
-        result_db = mongo_client.client.evaluator.datasets.find(
+        logger.debug(f"dataset_name: {dataset_name} exist on the database")
+        if mongo_client.client.evaluator.datasets.count_documents(
             {"dataset_name": dataset_name}
-        )
-        logger.debug(f"db_dataser_name = {result_db}")
+        ):
+
+            mongo_client.client.evaluator.datasets.delete_one(
+                {"dataset_name": dataset_name}
+            )
+            logger.debug(f"Dataset_name {dataset_name} is deleted on the database!")
+            return f" dataset_name {dataset_name} has been deleted on the database"
+
+        else:
+            logger.debug(f" Dataset_name not exist")
     except ValueError as e:
         msg = f"Datasetr_name: {dataset_name} does not found; Error: {e}"
         logger.error(msg)
         raise HTTPException(404, msg)
-
-    for item in result_db:
-        if item["dataset_name"] is not None:
-
-            try:
-                mongo_client.client.evaluator.datasets.delete_one(
-                    {"dataset_name": dataset_name}
-                )
-                logger.debug(f"Dataset_name {dataset_name} is deleted from mongodb!")
-            except ValueError as e:
-                msg = f"Dataset_name: {dataset_name} cannot be deleted on the database"
-                logger.error(msg)
-                raise HTTPException(404, msg)
-            return f"dataset_name: {dataset_name} has be deleted!"
 
     return f"dataset_name: {dataset_name} not exist on the Database!"
