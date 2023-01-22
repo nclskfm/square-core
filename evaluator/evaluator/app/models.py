@@ -9,24 +9,34 @@ from evaluator.app.mongo.mongo_model import MongoModel
 from evaluator.app.mongo.py_object_id import PyObjectId
 
 
-class DataSet(str, Enum):
-    """Enum for different data sets."""
+class ExtractiveQADatasetMapping(BaseModel):
+    id_column: str = Field(...)
+    question_column: str = Field(...)
+    context_column: str = Field(...)
+    answers_column: str = Field(...)
 
-    CommonSenseQA = "CommonSenseQA"
-    CosmosQA = "CosmosQA"
-    DROP = "DROP"
-    HotpotQA = "HotpotQA"
-    MultiRC = "MultiRC"
-    NarrativeQA = "NarrativeQA"
-    NewsQA = "NewsQA"
-    OpenBioASQ = "OpenBioASQ"
-    QuAIL = "QuAIL"
-    QuaRTz = "QuaRTz"
-    Quoref = "Quoref"
-    RACE = "RACE"
-    SQuAD = "SQuAD"
-    Social_IQA = "Social-IQA"
-    BoolQ = "BoolQ"
+
+class MultipleChoiceQADatasetMapping(BaseModel):
+    id_column: str = Field(...)
+    question_column: str = Field(...)
+    choices_columns: list[str] = Field(...)
+    choices_key_mapping_column: str = Field(...)
+    answer_index_column: str = Field(...)
+
+
+SUPPORTED_SKILL_TYPES = {
+    "extractive-qa": ExtractiveQADatasetMapping,
+    "multiple-choice": MultipleChoiceQADatasetMapping,
+}
+
+
+class DatasetMetadata(MongoModel):
+    name: str = Field(...)
+    skill_type: str = Field(...)
+    metric: str = Field(...)
+    mapping: Union[ExtractiveQADatasetMapping, MultipleChoiceQADatasetMapping] = Field(
+        ...
+    )
 
 
 class Prediction(BaseModel):
