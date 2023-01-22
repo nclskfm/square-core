@@ -72,7 +72,7 @@ class MetricResult(MongoModel):
     metrics: dict = Field(..., description="Dictionary of all Metric objects")
 
 
-class ExtractiveDatasetSample(BaseModel):
+class ExtractiveDatasetSample(MongoModel):
     id: str = Field(..., description="ID of the sample in the dataset.")
     question: str = Field(..., description="Question of the sample.")
     context: str = Field(
@@ -81,7 +81,7 @@ class ExtractiveDatasetSample(BaseModel):
     answers: List[str] = Field(...)
 
 
-class MultipleChoiceDatasetSample(BaseModel):
+class MultipleChoiceDatasetSample(MongoModel):
     id: str = Field(..., description="ID of the sample in the dataset.")
     question: str = Field(..., description="Question of the sample.")
     choices: List[str] = Field(...)
@@ -91,7 +91,7 @@ class MultipleChoiceDatasetSample(BaseModel):
     )
 
 
-class Dataset(BaseModel):
+class Dataset(MongoModel):
     dataset_name: str = Field(..., description="name of dataset")
     skill_type: str = Field(..., description="skill_type example")
     metric: str = Field(..., description="Metric of the sample")

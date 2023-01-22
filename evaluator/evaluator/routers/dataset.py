@@ -67,41 +67,8 @@ async def create_dataset(
         return {f"dataset: {dataset.dataset_name} exist on the database "}
 
     else:
-        if dataset.dataset_name == "quoref":
-            dataset_mapping = {
-                "dataset_name": dataset.dataset_name,
-                "skill-type": dataset.skill_type,
-                "metric": dataset.metric,
-                "mapping": {
-                    "id": dataset.mapping.id,
-                    "question": dataset.mapping.question,
-                    "context": dataset.mapping.context,
-                    "answers": dataset.mapping.answers,
-                },
-            }
-            logger.debug(f"extractive dataset_name: {dataset.dataset_name}")
-            mongo_client.client.evaluator.datasets.insert_one(dataset_mapping)
-            return {f"Dataset {dataset} has been added to mongo DB!"}
-
-        elif dataset.dataset_name == "commensense_qa":
-            dataset_mapping = {
-                "dataset_name": dataset.dataset_name,
-                "skill-type": dataset.skill_type,
-                "metric": dataset.metric,
-                "mapping": {
-                    "id": dataset.mapping.id,
-                    "question": dataset.mapping.question,
-                    "choices": dataset.mapping.choices,
-                    "answer_index": dataset.mapping.answer_index,
-                },
-            }
-            logger.debug(f" multiple-choice dataset_mapping: {dataset_mapping}")
-
-            mongo_client.client.evaluator.datasets.insert_one(dataset_mapping)
-            return {f"Dataset {dataset.dataset_name} has been added to mongo DB!"}
-
-        else:
-            return {f"Unknown dataset_name!"}
+        mongo_client.client.evaluator.datasets.insert_one(dataset.mongo())
+        return {f"Dataset {dataset.dataset_name} has been added to mongo DB!"}
 
 
 @router.get("/{dataset_name}", status_code=200)
@@ -118,38 +85,12 @@ async def get_dataset(
             {"dataset_name": dataset_name}
         ):
             logger.debug(f"Dataset_name exist on datasets collection!")
-            db_dataset_ob = mongo_client.client.evaluator.datasets.find(
-                {"dataset_name": dataset_name}
+            dataset = Dataset.from_mongo(
+                mongo_client.client.evaluator.datasets.find_one(
+                    {"dataset_name": dataset_name}
+                )
             )
-
-            for item in db_dataset_ob:
-
-                if str(dataset_name) == str("commonsense_qa"):
-                    return {
-                        "dataset_name": item["dataset_name"],
-                        "skill-type": item["skill-type"],
-                        "metric": item["metric"],
-                        "mapping": {
-                            "id": item["mapping"]["id"],
-                            "question": item["mapping"]["question"],
-                            "choices": item["mapping"]["choices"],
-                            "answer_index": item["mapping"]["answer_index"],
-                        },
-                    }
-                elif str(dataset_name) == str("quoref"):
-                    return {
-                        "dataset_name": item["dataset_name"],
-                        "skill-type": item["skill-type"],
-                        "metric": item["metric"],
-                        "mapping": {
-                            "id": item["mapping"]["id"],
-                            "question": item["mapping"]["question"],
-                            "context": item["mapping"]["context"],
-                            "answers": item["mapping"]["answers"],
-                        },
-                    }
-                else:
-                    return f" Undefined dataset_name"
+            return {"get dataset: ": dataset}
         else:
             return "Dataset_name not exist on the datasets collection!"
 
@@ -165,32 +106,24 @@ async def get_dataset(
 )
 async def update_dataset(dataset_name: str, skill_type: str, metric: str):
     logger.debug("put dataset")
-    metadata = get_dataset_metadata(dataset_name=dataset_name)
-
     # check if the dataset_name exist on the collection mongodb
     try:
-        dataset_result = mongo_client.client.evaluator.datasets.find(
+        # check if the dataset_name exist
+        if mongo_client.client.evaluator.datasets.find_one(
             {"dataset_name": dataset_name}
-        )
+        ):
+            logger.debug(f"dataset exist")
+            myquery = {"dataset_name": dataset_name}
+            new_value = {"$set": {"skill-type": skill_type, "metric": metric}}
+            mongo_client.client.evaluator.datasets.update_one(myquery, new_value)
+
+            logger.debug(f"Dataset_name {dataset_name} is updated from mongodb!")
+            return f"Dataset_name: {dataset_name} has be updated"
     except ValueError as e:
-        msg = f" The dataset_name: {dataset_name} not be found; Error: {e}!"
+        msg = f" The dataset_name: {dataset_name} cannot be updated; Error: {e}!"
         logger.error(msg)
         raise HTTPException(400, m)
-    for dataset_item in dataset_result:
-        if dataset_item["dataset_name"] is not None:
-            try:
-                myquery = {"dataset_name": dataset_item["dataset_name"]}
-                new_value = {"$set": {"skill-type": skill_type, "metric": metric}}
-                mongo_client.client.evaluator.datasets.update_one(myquery, new_value)
 
-                logger.debug(f"Dataset_name {dataset_name} is updated from mongodb!")
-                return f"Dataset_name: {dataset_item['dataset_name']} has be update"
-            except ValueError as e:
-                msg = (
-                    f" The dataset_name: {dataset_name} cannot be inserted; Error: {e}!"
-                )
-                logger.error(msg)
-                raise HTTPException(400, msg)
     return dataset_name
 
 
