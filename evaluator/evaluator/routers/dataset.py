@@ -125,7 +125,6 @@ async def get_dataset(
             for item in db_dataset_ob:
 
                 if str(dataset_name) == str("commonsense_qa"):
-
                     return {
                         "dataset_name": item["dataset_name"],
                         "skill-type": item["skill-type"],
