@@ -22,83 +22,85 @@ auth = Auth()
 @router.post("", status_code=201)
 async def create_dataset(
     *,
-    dataset_name: Dataset = Body(
+    dataset: Dataset = Body(
         examples={
-            "Multiple-Choicesample": {
-                "summary": "Multiple-Choicesample",
+            "multiple_Choice_qa": {
+                "summary": "Multiple-Choice sample",
                 "description": "for Multiple-Choice Dataset",
                 "value": {
-                    "name": "commensense_qa",
+                    "dataset_name": "commensense_qa",
                     "skill_type": "multiple-choice",
                     "metric": "accuracy",
                     "mapping": {
-                        "id-column": "id",
-                        "question-column": "question",
-                        "choice-columns": ["choice.text"],
-                        "choices-key-mapping-column": "choices.label",
-                        "answer-index-column": "answerkey",
+                        "id": "id",
+                        "question": "question",
+                        "choices": ["choice.text"],
+                        "answer_index": "1",
                     },
                 },
             },
-            "Extractivesample": {
-                "summary": "Extractivesample",
+            "extractive_qa": {
+                "summary": "Extractive sample",
                 "description": "for Extractive Dataset",
                 "value": {
-                    "name": "quoref",
-                    "skill-type": "extractive-qa",
+                    "dataset_name": "quoref",
+                    "skill_type": "extractive-qa",
                     "metric": "squad",
                     "mapping": {
-                        "id-column": "id",
-                        "question-column": "question",
-                        "context-column": "context",
-                        "answer-text-column": "answers.text",
+                        "id": "id",
+                        "question": "question",
+                        "context": "context",
+                        "answers": ["answers.text"],
                     },
                 },
             },
         },
     ),
 ):
-    logger.debug(f"post dataset: dataset_name= {name}")
-    dataset_name_exist = mongo_client.client.evaluator.datasets.find(
-        {"dataset_name": name}
-    )
-    logger.debug(f"post anfrage")
-    if dataset_name_exist is None:
-        logger.debug(f"dataset name is None ")
+    logger.debug(f"post dataset: {dataset}")
 
-        if name == "quoref":
+    if mongo_client.client.evaluator.datasets.count_documents(
+        {"dataset_name": dataset.dataset_name}
+    ):
+        logger.debug(f"The dataset_name exist on the database!")
+        return {f"dataset: {dataset.dataset_name} exist on the database "}
+
+    else:
+        if dataset.dataset_name == "quoref":
             dataset_mapping = {
-                "dataset_name": name,
-                "skill-type": skill_type,
-                "metric": metric,
+                "dataset_name": dataset.dataset_name,
+                "skill-type": dataset.skill_type,
+                "metric": dataset.metric,
                 "mapping": {
-                    "id-column": mapping["id-column"],
-                    "question-column": mapping["question-column"],
-                    "context-column": mapping["context-column"],
-                    "answer-text-column": mapping["answer-text-column"],
+                    "id": dataset.mapping.id,
+                    "question": dataset.mapping.question,
+                    "context": dataset.mapping.context,
+                    "answers": dataset.mapping.answers,
                 },
             }
-
+            logger.debug(f"extractive dataset_name: {dataset.dataset_name}")
             mongo_client.client.evaluator.datasets.insert_one(dataset_mapping)
-            logger.debug(f"dataset_name: ", {dataset_mapping})
+            return {f"Dataset {dataset} has been added to mongo DB!"}
 
-        elif name == "commensense_qa":
+        elif dataset.dataset_name == "commensense_qa":
             dataset_mapping = {
-                "dataset_name": name,
-                "skill-type": skill_type,
-                "metric": metric,
+                "dataset_name": dataset.dataset_name,
+                "skill-type": dataset.skill_type,
+                "metric": dataset.metric,
                 "mapping": {
-                    "id-column": mapping["id-column"],
-                    "question-column": mapping["question-column"],
-                    "choice-columns": mapping["choice-columns"],
-                    "choices-key-mapping-column": mapping["choices-key-mapping-column"],
-                    "answer-index-column": mapping["answer-index-column"],
+                    "id": dataset.mapping.id,
+                    "question": dataset.mapping.question,
+                    "choices": dataset.mapping.choices,
+                    "answer_index": dataset.mapping.answer_index,
                 },
             }
+            logger.debug(f" multiple-choice dataset_mapping: {dataset_mapping}")
 
             mongo_client.client.evaluator.datasets.insert_one(dataset_mapping)
-            logger.debug(f"dataset_name: ", {dataset_mapping})
-            return dataset_mapping
+            return {f"Dataset {dataset.dataset_name} has been added to mongo DB!"}
+
+        else:
+            return {f"Unknown dataset!"}
 
 
 @router.get("/{dataset_name}", status_code=200)
