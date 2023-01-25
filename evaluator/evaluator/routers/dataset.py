@@ -256,13 +256,13 @@ async def delete_dataset(dataset_name: str):
 
 
 async def validate_mapping_and_skill_type(dataset: Dataset):
-    if dataset.skill_type not in SUPPORTED_SKILL_TYPES.keys():
+    if dataset.skill_type not in SKILL_TYPES.keys():
         raise HTTPException(
             400,
-            f'Skill type {dataset.skill_type} not supported! Please use one of the following skill types: {", ".join(SUPPORTED_SKILL_TYPES.keys())}',
+            f'Skill type {dataset.skill_type} not supported! Please use one of the following skill types: {", ".join(SKILL_TYPES.keys())}',
         )
     try:
-        SUPPORTED_SKILL_TYPES[dataset.skill_type].parse_obj(dataset.mapping)
+        SKILL_TYPES[dataset.skill_type].parse_obj(dataset.mapping)
     except ValidationError as error:
         raise HTTPException(
             400,
