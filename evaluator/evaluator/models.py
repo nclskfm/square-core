@@ -99,3 +99,9 @@ class Dataset(MongoModel):
         ...,
         description="Dictionary of mapping object. The values depend on the respective dastaset.",
     )
+
+
+SKILL_TYPES = {
+    "extractive-qa": ExtractiveQADatasetMapping,
+    "multiple-choice": MultipleChoiceQADatasetMapping,
+}

@@ -6,12 +6,15 @@ from evaluate import load
 from fastapi import APIRouter, Body, Depends, FastAPI, HTTPException, Request
 from square_auth.auth import Auth
 
-from evaluator import mongo_client
-from evaluator.core.dataset_handler import DatasetDoesNotExistError, DatasetHandler
-from evaluator.models import Dataset, DataSet
-from evaluator.mongo.mongo_client import MongoClient
-from evaluator.routers import client_credentials
-from evaluator.routers.evaluator import get_dataset_metadata
+from evaluator.evaluator import mongo_client
+from evaluator.evaluator.core.dataset_handler import (
+    DatasetDoesNotExistError,
+    DatasetHandler,
+)
+from evaluator.evaluator.models import Dataset, DataSet
+from evaluator.evaluator.mongo.mongo_client import MongoClient
+from evaluator.evaluator.routers import client_credentials
+from evaluator.evaluator.routers.evaluator import get_dataset_metadata
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/dataset")
@@ -240,21 +243,28 @@ async def delete_dataset(dataset_name: str):
         dataset_handler = DatasetHandler()
         dataset_handler.remove_dataset(dataset_name)
 
-        if mongo_client.client.evaluator.datasets.count_documents(
+        # delete dataset from festplatte and remove to the database
+        mongo_client.client.evaluator.datasets.delete_one(
             {"dataset_name": dataset_name}
-        ):
-            # delete dataset from festplatte and remove to the database
-            mongo_client.client.evaluator.datasets.delete_one(
-                {"dataset_name": dataset_name}
-            )
-            raise HTTPException(
-                200, f"Dataset {dataset_name} has been deleted on the database"
-            )
-
-        else:
-            raise HTTPException(
-                404, f"Dataset {dataset_name} not exist on the database!"
-            )
+        )
+        raise HTTPException(
+            200, f"Dataset {dataset_name} has been deleted on the database"
+        )
     except Exception as e:
         msg = f"Dataset_name: {dataset_name} does not found! error {e}"
         raise HTTPException(404, msg)
+
+
+async def validate_mapping_and_skill_type(dataset: Dataset):
+    if dataset.skill_type not in SUPPORTED_SKILL_TYPES.keys():
+        raise HTTPException(
+            400,
+            f'Skill type {dataset.skill_type} not supported! Please use one of the following skill types: {", ".join(SUPPORTED_SKILL_TYPES.keys())}',
+        )
+    try:
+        SUPPORTED_SKILL_TYPES[dataset.skill_type].parse_obj(dataset.mapping)
+    except ValidationError as error:
+        raise HTTPException(
+            400,
+            f"Mapping and  skill type {dataset.skill_type} does not match! Error: {error.errors}",
+        )
