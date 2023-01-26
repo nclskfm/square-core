@@ -4,8 +4,8 @@ from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, validator
 
-from evaluator.mongo.mongo_model import MongoModel
-from evaluator.mongo.py_object_id import PyObjectId
+from evaluator.app.mongo.mongo_model import MongoModel
+from evaluator.app.mongo.py_object_id import PyObjectId
 
 
 class DataSet(str, Enum):
@@ -91,6 +91,12 @@ class MultipleChoiceDatasetSample(MongoModel):
     )
 
 
+SKILL_TYPES = {
+    "extractive-qa": MultipleChoiceDatasetSample,
+    "multiple-choice": ExtractiveDatasetSample,
+}
+
+
 class Dataset(MongoModel):
     dataset_name: str = Field(..., description="name of dataset")
     skill_type: str = Field(..., description="skill_type example")
@@ -99,9 +105,3 @@ class Dataset(MongoModel):
         ...,
         description="Dictionary of mapping object. The values depend on the respective dastaset.",
     )
-
-
-SKILL_TYPES = {
-    "extractive-qa": ExtractiveQADatasetMapping,
-    "multiple-choice": MultipleChoiceQADatasetMapping,
-}
