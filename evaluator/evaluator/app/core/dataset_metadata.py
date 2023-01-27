@@ -15,10 +15,16 @@ class DatasetMetadataDoesNotExistError(Exception):
 
 
 def get_dataset_metadata(dataset_name: str):
+    """
+    Function to retrieve the metadata for the specified `dataset_name`.
+
+    If no metadata is found, we raise `DatasetMetadataDoesNotExistError`.
+    """
     dataset_metadata = DatasetMetadata.from_mongo(
         mongo_client.client.evaluator.datasets.find_one({"name": dataset_name})
     )
     if dataset_metadata is None:
         raise DatasetMetadataDoesNotExistError(dataset_name)
 
+    logger.info(f"METADATA: {dataset_metadata}")
     return dataset_metadata

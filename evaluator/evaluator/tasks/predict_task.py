@@ -14,13 +14,13 @@ from square_auth.auth import Auth
 from evaluator.app import mongo_client
 from evaluator.app.core import DatasetHandler
 from evaluator.app.core.dataset_handler import DatasetDoesNotExistError
+from evaluator.app.core.dataset_metadata import get_dataset_metadata
 from evaluator.app.core.task_helper import task_id
 from evaluator.app.models import (
     Evaluation,
     EvaluationStatus,
     Prediction,
     PredictionResult,
-    get_dataset_metadata,
 )
 from evaluator.app.routers import client_credentials
 from evaluator.tasks import evaluate_task
@@ -99,20 +99,24 @@ def do_predict(
     for i in range(8):
         reference_data = dataset[i]
 
-        if dataset_metadata["skill-type"] == "extractive-qa":
+        if dataset_metadata.skill_type == "extractive-qa":
             query_request = {
-                "query": reference_data["question"],
-                "skill_args": {"context": reference_data["context"]},
+                "query": reference_data[dataset_metadata.mapping.question_column],
+                "skill_args": {
+                    "context": reference_data[dataset_metadata.mapping.context_column]
+                },
                 "num_results": 1,
             }
-        elif dataset_metadata["skill-type"] == "multiple-choice":
+        elif dataset_metadata.skill_type == "multiple-choice":
             query_request = {
-                "query": reference_data["question"],
-                "skill_args": {"choices": reference_data["choices"]},
+                "query": reference_data[dataset_metadata.mapping.question_column],
+                "skill_args": {
+                    "choices": reference_data[dataset_metadata.mapping.choices_columns]
+                },
                 "num_results": 1,
             }
         else:
-            skill_type = dataset_metadata["skill-type"]
+            skill_type = dataset_metadata.skill_type
             raise ValueError(
                 f"Predictions on '{skill_type}' datasets are currently not supported."
             )

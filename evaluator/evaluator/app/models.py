@@ -28,12 +28,20 @@ SUPPORTED_SKILL_TYPES = {
     "extractive-qa": ExtractiveQADatasetMapping,
     "multiple-choice": MultipleChoiceQADatasetMapping,
 }
+"""
+This constant contains all skill types that are supported during evaluation.
+It is a dictionary that maps the skill types to their mapping classes.
+This dictionary is used to automatically check the schema of the selected skill type.
+"""  # pylint: disable=W0105
 
 
 class DatasetMetadata(MongoModel):
     name: str = Field(...)
-    skill_type: str = Field(...)
-    metric: str = Field(...)
+    skill_type: str = Field(
+        ...,
+        description="Name of the skill type. The name must be defined by the application (validated by the constant `SUPPORTED_SKILL_TYPES`).",
+    )
+    metric: str = Field(..., description="Name of the default metric.")
     mapping: Union[ExtractiveQADatasetMapping, MultipleChoiceQADatasetMapping] = Field(
         ...
     )
@@ -157,58 +165,3 @@ class LeaderboardEntry(BaseModel):
         description="Whether the skill is only visible to the currently logged in user.",
     )
     result: dict = Field(..., description="Evaluation results of the metric.")
-
-
-# Mocked function. Remove after https://github.com/nclskfm/square-core/issues/7 is implemented.
-def get_dataset_metadata(dataset_name):
-    if dataset_name == "squad":
-        return {
-            "name": "squad",
-            "skill-type": "extractive-qa",
-            "metric": "squad",
-            "mapping": {
-                "id-column": "id",
-                "question-column": "question",
-                "context-column": "context",
-                "answer-text-column": "answers.text",
-            },
-        }
-    elif dataset_name == "quoref":
-        return {
-            "name": "quoref",
-            "skill-type": "extractive-qa",
-            "metric": "squad",
-            "mapping": {
-                "id-column": "id",
-                "question-column": "question",
-                "context-column": "context",
-                "answer-text-column": "answers.text",
-            },
-        }
-    elif dataset_name == "commonsense_qa":
-        return {
-            "name": "commonsense_qa",
-            "skill-type": "multiple-choice",
-            "metric": "accuracy",
-            "mapping": {
-                "id-column": "id",
-                "question-column": "question",
-                "choices-columns": ["choices.text"],
-                "choices-key-mapping-column": "choices.label",
-                "answer-index-column": "answerKey",
-            },
-        }
-    elif dataset_name == "cosmos_qa":
-        return {
-            "name": "cosmos_qa",
-            "skill-type": "multiple-choice",
-            "mapping": {
-                "id-column": "id",
-                "question-column": "question",
-                "choices-columns": ["answer0", "answer1", "answer2", "answer3"],
-                "choices-key-mapping-column": None,
-                "answer-index-column": "label",
-            },
-        }
-    else:
-        raise HTTPException(400, "Unsupported dataset!")
