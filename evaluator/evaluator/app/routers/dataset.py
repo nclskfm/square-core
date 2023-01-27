@@ -219,15 +219,10 @@ async def delete_dataset(dataset_name: str):
 
 
 async def validate_mapping_and_skill_type(dataset: Dataset):
-    if dataset.skill_type not in VALID_SKILL_TYPES.keys():
-        raise HTTPException(
-            404,
-            f' Invalid Skill type {dataset.skill_type} n! Use the following skill types: {", ".VALID_SKILL_TYPES.keys()[0], " and ".VALID_SKILL_TYPES.keys()[1]}',
-        )
     try:
         VALID_SKILL_TYPES[dataset.skill_type].parse_obj(dataset.mapping)
     except ValidationError as error:
         raise HTTPException(
             404,
-            f"Skill type {dataset.skill_type} and mapping does not match!",
+            f"Skill type {dataset.skill_type} and mapping does not match! error {error}",
         )
