@@ -149,6 +149,41 @@ class LeaderboardEntry(BaseModel):
     result: dict = Field(..., description="Evaluation results of the metric.")
 
 
+class ExtractiveQADataset(BaseModel):
+    id: str = Field(..., description="ID of the sample in the dataset.")
+    question: str = Field(..., description="Question of the dataset.")
+    context: str = Field(
+        ..., description="Context that contains the answer to the question."
+    )
+    answers: str = Field(..., description="Answer of Extrative dataset.")
+
+
+class MultipleChoiceQADataset(BaseModel):
+    id: str = Field(..., description="ID of the dataset.")
+    question: str = Field(..., description="Question of dataset.")
+    choices: list[str] = Field(..., description="choice of the dataset.")
+    choices_key_mapping: str = Field(
+        ..., description="choices key mapping of the dataset."
+    )
+    answer_index: str = Field(..., description="index of answer ")
+
+
+VALID_SKILL_TYPES = {
+    "extractive-qa": ExtractiveQADataset,
+    "multiple-choice": MultipleChoiceQADataset,
+}
+
+
+class Dataset(MongoModel):
+    dataset_name: str = Field(..., description="name of dataset")
+    skill_type: str = Field(..., description="skill_type example")
+    metric: str = Field(..., description="Metric of the sample")
+    mapping: Union[MultipleChoiceQADataset, ExtractiveQADataset] = Field(
+        ...,
+        description="Dictionary of mapping object. The values depend on the respective dastaset.",
+    )
+
+
 # Mocked function. Remove after https://github.com/nclskfm/square-core/issues/7 is implemented.
 def get_dataset_metadata(dataset_name):
     if dataset_name == "squad":
