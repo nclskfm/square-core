@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, List
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, Request
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
 from square_auth.auth import Auth
@@ -47,8 +47,40 @@ async def get_dataset(dataset_name: str):
 )
 async def create_metadata(
     request: Request,
-    dataset_metadata: DatasetMetadata,
     background_tasks: BackgroundTasks,
+    dataset_metadata: DatasetMetadata = Body(
+        examples={
+            "extractive-qa": {
+                "summary": "Extractive QA dataset mapping",
+                "value": {
+                    "name": "quoref",
+                    "skill_type": "extractive-qa",
+                    "metric": "squad",
+                    "mapping": {
+                        "id_column": "id",
+                        "question_column": "question",
+                        "context_column": "context",
+                        "answers_column": "answers.text",
+                    },
+                },
+            },
+            "multiple-choice": {
+                "summary": "Multiple Choice dataset mapping",
+                "value": {
+                    "name": "commonsense_qa",
+                    "skill_type": "multiple-choice",
+                    "metric": "exact_match",
+                    "mapping": {
+                        "id_column": "id",
+                        "question_column": "question",
+                        "choices_columns": ["choices.text"],
+                        "choices_key_mapping_column": "choices.label",
+                        "answer_index_column": "answerKey",
+                    },
+                },
+            },
+        }
+    ),
     dataset_handler: DatasetHandler = Depends(DatasetHandler),
     token_payload: Dict = Depends(auth),
 ):
@@ -86,8 +118,40 @@ async def create_metadata(
 )
 async def update_metadata(
     request: Request,
-    dataset_metadata: DatasetMetadata,
     background_tasks: BackgroundTasks,
+    dataset_metadata: DatasetMetadata = Body(
+        examples={
+            "extractive-qa": {
+                "summary": "Extractive QA dataset mapping",
+                "value": {
+                    "name": "quoref",
+                    "skill_type": "extractive-qa",
+                    "metric": "squad",
+                    "mapping": {
+                        "id_column": "id",
+                        "question_column": "question",
+                        "context_column": "context",
+                        "answers_column": "answers.text",
+                    },
+                },
+            },
+            "multiple-choice": {
+                "summary": "Multiple Choice dataset mapping",
+                "value": {
+                    "name": "commonsense_qa",
+                    "skill_type": "multiple-choice",
+                    "metric": "exact_match",
+                    "mapping": {
+                        "id_column": "id",
+                        "question_column": "question",
+                        "choices_columns": ["choices.text"],
+                        "choices_key_mapping_column": "choices.label",
+                        "answer_index_column": "answerKey",
+                    },
+                },
+            },
+        }
+    ),
     dataset_handler: DatasetHandler = Depends(DatasetHandler),
     token_payload: Dict = Depends(auth),
 ):
