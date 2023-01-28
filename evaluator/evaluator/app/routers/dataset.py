@@ -22,13 +22,13 @@ auth = Auth()
 
 @router.get(
     "",
-    response_model=List[str],
+    response_model=List[DatasetMetadata],
 )
 async def get_datasets():
     """Returns a list of supported data sets."""
 
     results = mongo_client.client.evaluator.datasets.find()
-    datasets = [DatasetMetadata.from_mongo(result).name for result in results]
+    datasets = [DatasetMetadata.from_mongo(result) for result in results]
     logger.debug("get_datasets {datasets}".format(datasets=datasets))
     return datasets
 
@@ -53,14 +53,14 @@ async def create_metadata(
     token_payload: Dict = Depends(auth),
 ):
     validate_access(token_payload)
+    validate_dataset_name(dataset_metadata.name)
     await validate_mapping_and_skill_type(dataset_metadata)
     validate_metric(dataset_metadata.metric)
-    validate_dataset_name(dataset_metadata.name)
 
     logger.info(f"Creating new metadata: {dataset_metadata}")
 
-    datasets = await get_datasets()
-    if dataset_metadata.name in datasets:
+    dataset_names = [d.name for d in await get_datasets()]
+    if dataset_metadata.name in dataset_names:
         message = f"Metadata entry with dataset_name={dataset_metadata.name} already exists! Please use the PUT method to update the entry."
         logger.warning(message)
         raise HTTPException(
@@ -92,14 +92,14 @@ async def update_metadata(
     token_payload: Dict = Depends(auth),
 ):
     validate_access(token_payload)
+    validate_dataset_name(dataset_metadata.name)
     await validate_mapping_and_skill_type(dataset_metadata)
     validate_metric(dataset_metadata.metric)
-    validate_dataset_name(dataset_metadata.name)
 
     logger.info(f"Updating metadata: {dataset_metadata}")
 
-    datasets = await get_datasets()
-    if dataset_metadata.name not in datasets:
+    dataset_names = [d.name for d in await get_datasets()]
+    if dataset_metadata.name not in dataset_names:
         message = f"Metadata entry with dataset_name={dataset_metadata.name} does not exist! Please use the POST method to create the entry."
         logger.warning(message)
         raise HTTPException(
@@ -175,10 +175,9 @@ def validate_access(token_payload: Dict):
     """
     Function to validate access. Currently SQuARE has no user roles, so we check for the statically defined user names.
     """
-    ALLOWED_USER_NAMES = ["ukp", "LOCAL_SQUARE_USER"]
+    ALLOWED_USER_NAMES = ["ukp", "local_square_user"]
     try:
-        logger.info(f"USERNAME {token_payload}")
-        if token_payload["username"] not in ALLOWED_USER_NAMES:
+        if token_payload["username"].lower() not in ALLOWED_USER_NAMES:
             logger.info(f'Access denied for user_name={token_payload["username"]}')
             raise KeyError
         logger.info(f'Access granted for user_name={token_payload["username"]}')

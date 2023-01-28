@@ -20,7 +20,7 @@ class MultipleChoiceQADatasetMapping(BaseModel):
     id_column: str = Field(...)
     question_column: str = Field(...)
     choices_columns: list[str] = Field(...)
-    choices_key_mapping_column: str = Field(...)
+    choices_key_mapping_column: Optional[str] = Field(...)
     answer_index_column: str = Field(...)
 
 

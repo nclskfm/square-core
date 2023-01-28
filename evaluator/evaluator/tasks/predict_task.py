@@ -101,18 +101,14 @@ def do_predict(
 
         if dataset_metadata.skill_type == "extractive-qa":
             query_request = {
-                "query": reference_data[dataset_metadata.mapping.question_column],
-                "skill_args": {
-                    "context": reference_data[dataset_metadata.mapping.context_column]
-                },
+                "query": reference_data["question"],
+                "skill_args": {"context": reference_data["context"]},
                 "num_results": 1,
             }
         elif dataset_metadata.skill_type == "multiple-choice":
             query_request = {
-                "query": reference_data[dataset_metadata.mapping.question_column],
-                "skill_args": {
-                    "choices": reference_data[dataset_metadata.mapping.choices_columns]
-                },
+                "query": reference_data["question"],
+                "skill_args": {"choices": reference_data["choices"]},
                 "num_results": 1,
             }
         else:
