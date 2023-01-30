@@ -153,3 +153,42 @@ export function pingSkill(headers, skillUrl) {
 export function getLeaderboard(dataset_name, metric_name, headers) {
     return axios.get(`${EVALUATOR_URL}/leaderboard/${dataset_name}/${metric_name}`, { headers: headers })
 }
+
+/**
+* Post datasets endpoint
+
+*/
+export function postDataset(dataset_name, skill, metric, headers) {
+    return axios.post(`${EVALUATOR_URL}/dataset/${skill}/${metric}`, { headers: headers })
+}
+
+/**
+ * Get all datasets for the evaluation
+ @param {Object} header Authentication header
+*/
+  export function getDataset(dataset_name, headers) {
+    return axios.get(`${EVALUATOR_URL}/dataset/${dataset_name}`, { headers: headers })
+}
+
+/**
+* Put/Update datasets
+* @param {String} dataset_name Name of the dataset to get the evaluation.
+* @param {String} skill Name of the skill to get the evaluation.
+* @param {String} metric Name of the metric to get the evaluation.
+
+ * @param {Object} headers Authentication header
+
+*/
+export function putDataset(dataset_name, skill, metric, headers) {
+    return axios.put(`${EVALUATOR_URL}/dataset/${dataset_name}/${skill}/${metric}`, { headers: headers })
+}
+
+/**
+* Delete datasets data
+* @param {String} dataset_name Name of the dataset to get the evaluation.
+ * @param {Object} headers Authentication header
+
+*/
+export function deleteDataset(dataset_name, headers) {
+    return axios.delete(`${EVALUATOR_URL}/dataset/${dataset_name}`, { headers: headers })
+}
