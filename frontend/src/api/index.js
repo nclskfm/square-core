@@ -159,5 +159,5 @@ export function getLeaderboard(dataset_name, metric_name, headers) {
  * @param {Object} headers Authentication header
  */
  export function getEvaluations(headers) {
-    return axios.get(`${EVALUATOR_URL}/evaluations`, { headers: headers })
+    return axios.get(`${EVALUATOR_URL}/`, { headers: headers })
 }

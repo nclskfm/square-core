@@ -21,7 +21,25 @@ router = APIRouter(prefix="/dataset")
 auth = Auth()
 
 
-@router.post("", status_code=201)
+@router.post(
+    "/get_all_dataset",
+    response_model=List,
+)
+async def get_all_dataset_name(
+    request: Request,
+    token: str = Depends(client_credentials),
+):
+    """
+    Retrieve List of Dataset on the Evaluationboard
+    """
+    all_dataset = Dataset.from_mongo(mongo_client.client.evaluator.datasets.find_all())
+    dataset_list = dict()
+    for item in all_dataset:
+        dataset_list[item["dataset_name"]] = item
+    return dataset_list
+
+
+@router.post("/", status_code=201)
 async def create_dataset(
     *,
     dataset: Dataset = Body(
@@ -114,7 +132,7 @@ async def get_dataset(
         raise HTTPException(404, m)
 
 
-@router.put("", status_code=200)
+@router.put("/put/", status_code=200)
 async def update_dataset(
     dataset: Dataset = Body(
         examples={
@@ -201,7 +219,7 @@ async def update_dataset(
 
 
 @router.delete(
-    "/{dataset_name}",
+    "/delete/{dataset_name}",
     status_code=200,
 )
 async def delete_dataset(dataset_name: str):

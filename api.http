@@ -47,3 +47,18 @@ Authorization: Bearer {{token}}
 GET https://square.ukp-lab.de/api/datastores/nq/indices HTTP/1.1
 Host: {{hostname}}
 Authorization: Bearer {{token}}
+
+
+###
+# @name get_datastores
+@token =  {{get_token.response.body.access_token}}
+GET https://square.ukp-lab.de/api/datastores HTTP/1.1
+Host: {{hostname}}
+Authorization: Bearer {{token}}
+
+###
+# @name get_datastores_indices
+@token =  {{get_token.response.body.access_token}}
+GET https://square.ukp-lab.de/api/datastores/nq/indices HTTP/1.1
+Host: {{hostname}}
+Authorization: Bearer {{token}}
