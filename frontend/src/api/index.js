@@ -163,32 +163,17 @@ export function postDataset(dataset_name, skill, metric, headers) {
 }
 
 /**
- * Get all datasets for the evaluation
+ * Get only one datasets for the evaluation
  @param {Object} header Authentication header
 */
-  export function getDataset(dataset_name, headers) {
+export function getDataset(dataset_name, headers) {
     return axios.get(`${EVALUATOR_URL}/dataset/${dataset_name}`, { headers: headers })
 }
 
 /**
-* Put/Update datasets
-* @param {String} dataset_name Name of the dataset to get the evaluation.
-* @param {String} skill Name of the skill to get the evaluation.
-* @param {String} metric Name of the metric to get the evaluation.
-
- * @param {Object} headers Authentication header
-
+ * Get a list of datasets for the evaluation
+ @param {Object} header Authentication header
 */
-export function putDataset(dataset_name, skill, metric, headers) {
-    return axios.put(`${EVALUATOR_URL}/dataset/${dataset_name}/${skill}/${metric}`, { headers: headers })
-}
-
-/**
-* Delete datasets data
-* @param {String} dataset_name Name of the dataset to get the evaluation.
- * @param {Object} headers Authentication header
-
-*/
-export function deleteDataset(dataset_name, headers) {
-    return axios.delete(`${EVALUATOR_URL}/dataset/${dataset_name}`, { headers: headers })
+export function getDataset_list(headers) {
+    return axios.get(`${EVALUATOR_URL}/dataset/`, { headers: headers })
 }

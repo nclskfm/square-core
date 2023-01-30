@@ -226,3 +226,20 @@ async def validate_mapping_and_skill_type(dataset: Dataset):
             404,
             f"Skill type {dataset.skill_type} and mapping does not match! error {error}",
         )
+
+
+@router.get("", status_code=200)
+async def get_dataset():
+    # check if the item exist
+    dataset_handler.get_dataset(dataset_name)
+    if (
+        dataset := Dataset.from_mongo(
+            mongo_client.client.evaluator.datasets.find_one(
+                {"dataset_name": dataset_name}
+            )
+        )
+    ) is not None:
+        return jsonable_encoder(dataset)
+    else:
+        m = f"Dataset_name: {dataset_name} not exist on the database collection!"
+        raise HTTPException(404, m)
