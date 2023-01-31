@@ -1,20 +1,44 @@
 import logging
 from typing import Dict, List
 
-from fastapi import APIRouter, BackgroundTasks, Body, Depends, Request
+from bson import ObjectId
+from evaluate import load
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Body,
+    Depends,
+    FastAPI,
+    HTTPException,
+    Request,
+)
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import HTTPException
 from pydantic import ValidationError
 from square_auth.auth import Auth
 
 from evaluator.app import mongo_client
-from evaluator.app.core.dataset_handler import DatasetHandler
+
+# from evaluator.app.mongo import mongo_client
+from evaluator.app.core.dataset_handler import DatasetDoesNotExistError, DatasetHandler
 from evaluator.app.core.dataset_metadata import (
     DatasetMetadataDoesNotExistError,
     get_dataset_metadata,
 )
-from evaluator.app.core.task_helper import dataset_name_exists, metric_exists
-from evaluator.app.models import SUPPORTED_SKILL_TYPES, DatasetMetadata
+from evaluator.app.core.task_helper import (
+    dataset_exists,
+    dataset_name_exists,
+    metric_exists,
+)
+from evaluator.app.models import (
+    SUPPORTED_SKILL_TYPES,
+    VALID_SKILL_TYPES,
+    Dataset,
+    DatasetMetadata,
+)
+from evaluator.app.routers import client_credentials
 
+dataset_handler = DatasetHandler()
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/dataset")
 auth = Auth()
@@ -25,8 +49,9 @@ auth = Auth()
     response_model=List[DatasetMetadata],
 )
 async def get_datasets():
-    """Returns a list of supported data sets."""
 
+    """Returns a list of supported data sets."""
+    logger.debug("Coretta")
     results = mongo_client.client.evaluator.datasets.find()
     datasets = [DatasetMetadata.from_mongo(result) for result in results]
     logger.debug("get_datasets {datasets}".format(datasets=datasets))

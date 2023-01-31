@@ -24,7 +24,7 @@ export function getSkillTypes(headers) {
  * @param {Object} headers optional authentication header
  */
 export function getDataSets(headers) {
-    return axios.get(`${EVALUATOR_URL}/dataset`, { headers: headers })
+    return axios.get(`${EVALUATOR_URL}/dataset/all_datasets`, { headers: headers })
 }
 
 /**
@@ -152,4 +152,12 @@ export function pingSkill(headers, skillUrl) {
  */
 export function getLeaderboard(dataset_name, metric_name, headers) {
     return axios.get(`${EVALUATOR_URL}/leaderboard/${dataset_name}/${metric_name}`, { headers: headers })
+}
+
+/**
+ * Get all user and public evaluations.
+ * @param {Object} headers Authentication header
+ */
+ export function getEvaluations(headers) {
+    return axios.get(`${EVALUATOR_URL}/`, { headers: headers })
 }

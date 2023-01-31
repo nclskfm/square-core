@@ -133,6 +133,22 @@ class MetricResult(MongoModel):
     metrics: dict = Field(..., description="Dictionary of all Metric objects")
 
 
+class EvaluationResult(BaseModel):
+    evaluation_id: str = Field(..., description="Skill Id + metric name")
+    skill_name: str = Field(..., description="Model name")
+    dataset: str = Field(..., description="Dataset used for evaluation")
+    public: bool = Field(
+        ...,
+        description="Describes wether it's a public evaluation or a private evaluation for the user.",
+    )
+    metric_name: str = Field(..., description="Metric name")
+    metric_result: dict = Field(..., description="List with single metric results")
+    skill_url: str = Field(
+        ...,
+        description="Skill url, used to check if skill is available to compute evaluations",
+    )
+
+
 class ExtractiveDatasetSample(BaseModel):
     id: str = Field(..., description="ID of the sample in the dataset.")
     question: str = Field(..., description="Question of the sample.")
@@ -173,3 +189,93 @@ class LeaderboardEntry(BaseModel):
         description="Whether the skill is only visible to the currently logged in user.",
     )
     result: dict = Field(..., description="Evaluation results of the metric.")
+
+
+class ExtractiveQADataset(BaseModel):
+    id: str = Field(..., description="ID of the sample in the dataset.")
+    question: str = Field(..., description="Question of the dataset.")
+    context: str = Field(
+        ..., description="Context that contains the answer to the question."
+    )
+    answers: str = Field(..., description="Answer of Extrative dataset.")
+
+
+class MultipleChoiceQADataset(BaseModel):
+    id: str = Field(..., description="ID of the dataset.")
+    question: str = Field(..., description="Question of dataset.")
+    choices: list[str] = Field(..., description="choice of the dataset.")
+    choices_key_mapping: str = Field(
+        ..., description="choices key mapping of the dataset."
+    )
+    answer_index: str = Field(..., description="index of answer ")
+
+
+VALID_SKILL_TYPES = {
+    "extractive-qa": ExtractiveQADataset,
+    "multiple-choice": MultipleChoiceQADataset,
+}
+
+
+class Dataset(MongoModel):
+    dataset_name: str = Field(..., description="name of dataset")
+    skill_type: str = Field(..., description="skill_type example")
+    metric: str = Field(..., description="Metric of the sample")
+    mapping: Union[MultipleChoiceQADataset, ExtractiveQADataset] = Field(
+        ...,
+        description="Dictionary of mapping object. The values depend on the respective dastaset.",
+    )
+
+
+# Mocked function. Remove after https://github.com/nclskfm/square-core/issues/7 is implemented.
+def get_dataset_metadata(dataset_name):
+    if dataset_name == "squad":
+        return {
+            "name": "squad",
+            "skill-type": "extractive-qa",
+            "metric": "squad",
+            "mapping": {
+                "id-column": "id",
+                "question-column": "question",
+                "context-column": "context",
+                "answer-text-column": "answers.text",
+            },
+        }
+    elif dataset_name == "quoref":
+        return {
+            "name": "quoref",
+            "skill-type": "extractive-qa",
+            "metric": "squad",
+            "mapping": {
+                "id-column": "id",
+                "question-column": "question",
+                "context-column": "context",
+                "answer-text-column": "answers.text",
+            },
+        }
+    elif dataset_name == "commonsense_qa":
+        return {
+            "name": "commonsense_qa",
+            "skill-type": "multiple-choice",
+            "metric": "accuracy",
+            "mapping": {
+                "id-column": "id",
+                "question-column": "question",
+                "choices-columns": ["choices.text"],
+                "choices-key-mapping-column": "choices.label",
+                "answer-index-column": "answerKey",
+            },
+        }
+    elif dataset_name == "cosmos_qa":
+        return {
+            "name": "cosmos_qa",
+            "skill-type": "multiple-choice",
+            "mapping": {
+                "id-column": "id",
+                "question-column": "question",
+                "choices-columns": ["answer0", "answer1", "answer2", "answer3"],
+                "choices-key-mapping-column": None,
+                "answer-index-column": "label",
+            },
+        }
+    else:
+        raise HTTPException(400, "Unsupported dataset!")

@@ -5,7 +5,7 @@
         <h2>Leaderboard</h2>
         <p>Compare different skills and how they perform on different datasets.</p>
         <p>Missing some results? Start a new evaluation and results will appear on the leaderboard once the evaluation finishes.</p>
-        <router-link class="btn btn-primary" to="/evaluation" exact-active-class="active">Start new evaluation</router-link>
+        <router-link class="btn btn-primary" to="/start_evaluation" exact-active-class="active">Start new evaluation</router-link>
       </div>
     </div>
     
