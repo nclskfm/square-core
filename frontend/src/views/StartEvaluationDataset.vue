@@ -45,7 +45,8 @@ export default {
   data() {
     return {
       value: null,
-      options: ["squad", "quoref",]
+        datasets: [],
+        options: ["squad", "quoref",]
         //{ label: "Dataset", city: "Dataset" },
         //{ label: "Dataset 2", city: "Dataset 2" },
         //{ label: "Dataset 3", city: "Dataset 3", $isDisabled: true }, -->
@@ -109,6 +110,10 @@ export default {
     labelWithCity({ label, city }) {
       return `${label} — [${city}]`;
     },
+    pushdataset(){
+
+    }
+
   },
 };
 </script>

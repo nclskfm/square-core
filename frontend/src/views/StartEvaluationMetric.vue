@@ -3,9 +3,10 @@
     <multiselect
       id="metric_evaluation"
       v-model="value"
+      value="item"
       :options="metrics"
       placeholder="Select the name of metric"
-      label="label"
+      label="name"
       track-by="id"
       :custom-label="labelWithCity"
       :multiple="false"
@@ -14,8 +15,8 @@
       :show-no-results="true"
       :hide-selected="false"
       :allow-empty="true"
+            @select="optionSelected">
 
-    >
 
       <!-- affichage du multiselect plié -->
       <template slot="singleLabel" slot-scope="{ option }">
@@ -46,15 +47,25 @@ export default {
 
   data() {
     return {
+          item: {
+        name: 'Not selected'
+      },
       value: null,
       metrics: ["squad", "squad_v2", "exact_match"],
     };
   },
+   computed: {
+
+  },
+
   methods: {
     //l'affichage des options lorsqu'il n'y a pas de template avec slot=singleLabel ou slot=option
     labelWithCity({ label, city }) {
       return `${label} — [${city}]`;
     },
+        onSelect(option) {
+      this.item = option
+    }
   },
 };
 </script>
