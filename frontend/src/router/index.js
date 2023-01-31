@@ -11,6 +11,7 @@ const BehavioralTests = () => import('../views/BehavioralTests')
 const Skills = () => import('../views/Skills')
 const Skill = () => import('../views/Skill')
 const Evaluation = () => import('../views/Evaluation')
+const StartEvaluation = () => import('../views/StartEvaluation')
 const Leaderboard = () => import('../views/Leaderboard')
 const Feedback = () => import('../views/Feedback')
 const Terms = () => import('../views/Terms')
@@ -45,6 +46,14 @@ const routes = [
     path: '/skills/:id',
     name: 'skill',
     component: Skill,
+    meta: {
+      requiresAuthentication: true
+    }
+  },
+  {
+    path: '/start_evaluation',
+    name: 'start_evaluation',
+    component: StartEvaluation,
     meta: {
       requiresAuthentication: true
     }

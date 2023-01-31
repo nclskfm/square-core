@@ -650,7 +650,10 @@ export default Vue.component('edit-skill', {
       })
     getDataSets(this.$store.getters.authenticationHeader())
       .then((response) => {
-        this.dataSets = response.data
+        for (let item_dataset = 0; item_dataset < response.data.length; item_dataset++){
+        this.dataSets.push(response.data[item_dataset].name);
+        }
+        console.log("skill datasets: ", this.options);
       })
     getDatastores(this.$store.getters.authenticationHeader())
       .then((response) => {

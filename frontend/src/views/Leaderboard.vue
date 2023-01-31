@@ -5,7 +5,7 @@
         <h2>Leaderboard</h2>
         <p>Compare different skills and how they perform on different datasets.</p>
         <p>Missing some results? Start a new evaluation and results will appear on the leaderboard once the evaluation finishes.</p>
-        <router-link class="btn btn-primary" to="/evaluation" exact-active-class="active">Start new evaluation</router-link>
+        <router-link class="btn btn-primary" to="/start_evaluation" exact-active-class="active">Start new evaluation</router-link>
       </div>
     </div>
     
@@ -13,7 +13,7 @@
       <div class="row">
         <div class="col-sm-8 col-12 mb-3">
           <label for="dataset" class="form-label">Dataset</label>
-          <multiselect id="dataset" v-model="datasetName" :options="datasetNames" :disabled=isLoading placeholder="Select a dataset" @select="refreshLeaderboard('dataset')"></multiselect>
+          <multiselect id="dataset" v-model="value" :options="datasets" :disabled=isLoading placeholder="Select a dataset" @select="refreshLeaderboard('dataset')"></multiselect>
         </div>
         <div class="col-sm-4 col-12 mb-3">
           <label for="dataset" class="form-label">Metric</label>
@@ -118,52 +118,10 @@ export default Vue.component("show-leaderboard", {
     window.addEventListener("resize", this.handleResize)
     getDataSets(this.$store.getters.authenticationHeader())
       .then((response) => {
-        this.datasets = response.data
-        this.datasets = [
-          {
-            "name": "squad",
-            "skill-type": "extractive-qa",
-            "metric": "squad",
-            "mapping": {
-              "id-column": "id",
-              "question-column": "question",
-              "context-column": "context",
-              "answer-text-column": "answers.text"
-            }
-          }, {
-            "name": "quoref",
-            "skill-type": "extractive-qa",
-            "metric": "squad",
-            "mapping": {
-              "id-column": "id",
-              "question-column": "question",
-              "context-column": "context",
-              "answer-text-column": "answers.text"
-            }
-          }, {
-            "name": "commonsense_qa",
-            "skill-type":" multiple-choice",
-            "metric": "exact_match",
-            "mapping": {
-              "id-column": "id",
-              "question-column": "question",
-              "choices-columns": ["choices.text"],
-              "choices-key-mapping-column": "choices.label",
-              "answer-index-column": "answerKey"
-            }
-          }, {
-            "name": "cosmos_qa",
-            "skill-type": "multiple-choice",
-            "metric": "exact_match",
-            "mapping":{
-              "id-column": "id",
-              "question-column": "question",
-              "choices-columns": ["answer0", "answer1", "answer2", "answer3"],
-              "choices-key-mapping-column": null,
-              "answer-index-column": "label"
-            }
-          }
-        ]
+        for (let item_dataset = 0; item_dataset < response.data.length; item_dataset++){
+        this.datasets.push(response.data[item_dataset].name);
+        }
+        console.log("leaderboard datasets: ", this.options);
       })
     this.refreshLeaderboard()
   },
