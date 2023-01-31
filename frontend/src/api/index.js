@@ -20,7 +20,7 @@ export function getSkillTypes(headers) {
 }
 
 /**
- * Get a list of available datasets.
+ * Get a list of all available datasets.
  * @param {Object} headers optional authentication header
  */
 export function getDataSets(headers) {
