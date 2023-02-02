@@ -26,10 +26,11 @@ auth = Auth()
 )
 async def get_datasets():
     """Returns a list of supported data sets."""
-
+    datasets = []
     results = mongo_client.client.evaluator.datasets.find()
-    datasets = [DatasetMetadata.from_mongo(result) for result in results]
-    logger.debug("get_datasets {datasets}".format(datasets=datasets))
+    for item in results:
+        DatasetMetadata.from_mongo(item)
+        datasets.append(item)
     return datasets
 
 
@@ -107,7 +108,7 @@ async def create_metadata(
         background_tasks.add_task(
             trigger_download_dataset, dataset_handler, dataset_metadata.name
         )
-        return
+        return dataset_metadata
     else:
         raise RuntimeError(result.raw_result)
 
